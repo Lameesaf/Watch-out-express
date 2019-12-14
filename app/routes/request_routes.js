@@ -17,16 +17,16 @@ const router = express.Router();
  */
 
 router.get('/api/requests', (req, res) => {
+
   // user = db.runCommand({connectionStatus : 1}).authInfo.authenticatedUsers[0]
-  // console.log('hhhhh',user)
-  Request.find()
+  Request.find({user_id:"5df4e63b7c60c501ac229bcf"})
+
   //Return all Request as an array
   .then((requests) => {
     return res.status(200).json({ requests: requests })
   })
   //catch any error that might accrue
   .catch((error) => {
-    console.log('hhhhh')
     res.status(500).json({ error: error })
     })
 })
@@ -40,7 +40,8 @@ router.get('/api/requests', (req, res) => {
 */
 
 router.get('/api/requests/:request_id', (req, res) => {
-  Request.findById(req.params.request_id)
+
+  Request.find({user_id: "5df4e63b7c60c501ac229bcf" , _id:req.params.request_id })
   .then((request) => {
     if (request) {
       //Pass the result of Mongoose's `.get` method to the next `.then`
@@ -69,8 +70,16 @@ router.get('/api/requests/:request_id', (req, res) => {
 */
 
 router.post('/api/requests', (req, res) => {
-  console.log('hi')
-  Request.create(req.body.request)
+
+  const newRequest = {
+    user_id: "5df4e63b7c60c501ac229bcf",
+    shop_name: req.body.request.shop_name,
+    shift: req.body.request.shift,
+    days: req.body.request.days,
+    details: req.body.request.details,
+  }
+    console.log(newRequest)
+  Request.create(newRequest)
     //on a successful `create` action, respond with 201
     //HTTP status and the content of the new request
     .then((newRequest) => {
@@ -92,12 +101,17 @@ router.post('/api/requests', (req, res) => {
 */
 
 router.patch('/api/requests/:request_id', (req, res) => {
-  Request.findById(req.params.request_id)
+
+  Request.findOneAndUpdate({user_id: "5df4e63b7c60c501ac229bcf" , _id:req.params.request_id },{
+    shop_name: req.body.request.shop_name,
+          shift: req.body.request.shift,
+          days: req.body.request.days,
+          details: req.body.request.details,
+  },{new: true})
     .then((request) => {
       if (request) {
         //Pass the result of Mongoose's `.update` method to the next `.then`
-        
-        return request.update(req.body.request)
+        return request
       } else {
         //if we couldn't find a document with matching ID
         res.status(404).json({
@@ -114,6 +128,7 @@ router.patch('/api/requests/:request_id', (req, res) => {
     })
     //catch any error that might accrue
     .catch((error) => {
+      console.log(error)
       res.status(500).json({ error: error });
     })
 })
@@ -128,11 +143,13 @@ router.patch('/api/requests/:request_id', (req, res) => {
 */
 
 router.delete('/api/requests/:request_id', (req, res) => {
-  Request.findById(req.params.request_id)
+  
+  Request.findOneAndRemove({user_id: "5df4e63b7c60c501ac229bcf", _id:req.params.request_id })
     .then((request) => {
       if (request) {
         //Pass the result of Mongoose's `.delete` method to the next `.then`
-        return request.remove()
+        console.log(request)
+        return request
       } else {
         //if we couldn't find a document with matching ID
         res.status(404).json({
