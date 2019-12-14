@@ -24,7 +24,7 @@ const requestSchema = new mongoose.Schema({
   },
   shop_name: {type: String, required:true},
   shift: {type: String, required:true},
-  Days: [String],
+  days: [String],
   details: {type: String, required:true},
   status: {
     type:mongoose.Schema.Types.ObjectId,
@@ -35,4 +35,6 @@ const requestSchema = new mongoose.Schema({
 
 
 const Request = mongoose.model('Request', requestSchema)
-module.exports = {Request, Status}
+const Review = mongoose.model('Review', reviewSchema)
+
+module.exports = {Request, Status, Review}
