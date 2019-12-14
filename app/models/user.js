@@ -6,15 +6,8 @@ const roleSchema = new mongoose.Schema({
 const Role = mongoose.model('Role', roleSchema)
 
 const userSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  hashedPassword: {
-    type: String,
-    required: true
-  },
+  email: {type: String, required: true, unique: true },
+  hashedPassword: { type: String, required: true },
   token: String,
   name: {type: String, required:true},
   role: {
