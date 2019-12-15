@@ -4,6 +4,9 @@ const express = require('express');
 //Require Mongoose Model for Request
 const Request = require('../models/request').Request
 
+const passport = require('passport')
+
+const requireToken = passport.authenticate('bearer', { session: false })
 
 //Instantiate a Router (mini app that only handles routes)
 const router = express.Router();
@@ -16,18 +19,18 @@ const router = express.Router();
  * Description:   Get all requests
  */
 
-router.get('/api/requests', (req, res) => {
+router.get('/api/requests', requireToken, (req, res) => {
 
-  // user = db.runCommand({connectionStatus : 1}).authInfo.authenticatedUsers[0]
-  Request.find({user_id:"5df4e63b7c60c501ac229bcf"})
+  console.log(req.user)
+  Request.find({ user_id: req.user._id })
 
-  //Return all Request as an array
-  .then((requests) => {
-    return res.status(200).json({ requests: requests })
-  })
-  //catch any error that might accrue
-  .catch((error) => {
-    res.status(500).json({ error: error })
+    //Return all Request as an array
+    .then((requests) => {
+      return res.status(200).json({ requests: requests })
+    })
+    //catch any error that might accrue
+    .catch((error) => {
+      res.status(500).json({ error: error })
     })
 })
 
@@ -39,27 +42,27 @@ router.get('/api/requests', (req, res) => {
 * Description:   Get an Request by Request id
 */
 
-router.get('/api/requests/:request_id', (req, res) => {
+router.get('/api/requests/:request_id', requireToken, (req, res) => {
 
-  Request.find({user_id: "5df4e63b7c60c501ac229bcf" , _id:req.params.request_id })
-  .then((request) => {
-    if (request) {
-      //Pass the result of Mongoose's `.get` method to the next `.then`
-      res.status(200).send(request);
-    } else {
-      //if we couldn't find a document with matching ID
-      res.status(404).json({
-        error: {
-          name: 'Document not found error',
-          message: 'The provided ID doesn\'t match any document'
-        }
-      })
-    }
-  })
-  //catch any error that might accrue
-  .catch((error) => {
-    res.status(500).json({ error: error });
-  })
+  Request.find({ user_id: req.user._id, _id: req.params.request_id })
+    .then((request) => {
+      if (request) {
+        //Pass the result of Mongoose's `.get` method to the next `.then`
+        res.status(200).send(request);
+      } else {
+        //if we couldn't find a document with matching ID
+        res.status(404).json({
+          error: {
+            name: 'Document not found error',
+            message: 'The provided ID doesn\'t match any document'
+          }
+        })
+      }
+    })
+    //catch any error that might accrue
+    .catch((error) => {
+      res.status(500).json({ error: error });
+    })
 })
 
 /**
@@ -69,16 +72,17 @@ router.get('/api/requests/:request_id', (req, res) => {
 * Description:   Create a new Request
 */
 
-router.post('/api/requests', (req, res) => {
+router.post('/api/requests', requireToken, (req, res) => {
 
+   console.log(req.user)
   const newRequest = {
-    user_id: "5df4e63b7c60c501ac229bcf",
+    user_id: req.user._id,
     shop_name: req.body.request.shop_name,
     shift: req.body.request.shift,
     days: req.body.request.days,
     details: req.body.request.details,
   }
-    console.log(newRequest)
+  console.log(newRequest)
   Request.create(newRequest)
     //on a successful `create` action, respond with 201
     //HTTP status and the content of the new request
@@ -100,14 +104,14 @@ router.post('/api/requests', (req, res) => {
 * Description:   Update an Request by Request id
 */
 
-router.patch('/api/requests/:request_id', (req, res) => {
+router.patch('/api/requests/:request_id', requireToken, (req, res) => {
 
-  Request.findOneAndUpdate({user_id: "5df4e63b7c60c501ac229bcf" , _id:req.params.request_id },{
+  Request.findOneAndUpdate({ user_id: req.user._id, _id: req.params.request_id }, {
     shop_name: req.body.request.shop_name,
-          shift: req.body.request.shift,
-          days: req.body.request.days,
-          details: req.body.request.details,
-  },{new: true})
+    shift: req.body.request.shift,
+    days: req.body.request.days,
+    details: req.body.request.details,
+  }, { new: true })
     .then((request) => {
       if (request) {
         //Pass the result of Mongoose's `.update` method to the next `.then`
@@ -142,9 +146,9 @@ router.patch('/api/requests/:request_id', (req, res) => {
 * Description:   Delete an Request by Request id
 */
 
-router.delete('/api/requests/:request_id', (req, res) => {
-  
-  Request.findOneAndRemove({user_id: "5df4e63b7c60c501ac229bcf", _id:req.params.request_id })
+router.delete('/api/requests/:request_id', requireToken, (req, res) => {
+
+  Request.findOneAndRemove({ user_id: req.user._id, _id: req.params.request_id })
     .then((request) => {
       if (request) {
         //Pass the result of Mongoose's `.delete` method to the next `.then`
