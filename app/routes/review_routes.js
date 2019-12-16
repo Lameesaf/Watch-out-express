@@ -5,6 +5,10 @@ const express = require('express');
 const Request = require('../models/request').Request
 const Review = require('../models/request').Review
 
+const passport = require('passport')
+
+const requireToken = passport.authenticate('bearer', { session: false })
+
 
 //Instantiate a Router (mini app that only handles routes)
 const router = express.Router();
@@ -17,15 +21,17 @@ const router = express.Router();
  * Description:   Get all reviews
  */
 
-router.get('/api/reviews', (req, res) => {
+router.get('/api/reviews', requireToken, (req, res) => {
 
-  // user = db.runCommand({connectionStatus : 1}).authInfo.authenticatedUsers[0]
-  Review.find()
-    // Review.find({user_id: _id})
+  Request.find({ 'review.user_id': req.user.id })
+    // Request.find({})
+    .then((request) => {
 
-    //Return all Review as an array
-    .then((reviews) => {
-      return res.status(200).json({ reviews: reviews })
+      const allReview = request.map(request=>{
+
+        return { review: request.review }
+      })
+        return res.status(200).json({reviews: allReview});
     })
     //catch any error that might accrue
     .catch((error) => {
@@ -41,10 +47,12 @@ router.get('/api/reviews', (req, res) => {
 * Description:   Get a Review by Review id
 */
 
-router.get('/api/reviews/:review_id', (req, res) => {
+router.get('/api/reviews/:review_id', requireToken, (req, res) => {
 
   // Request.find({user_id: _id , review:req.params.review_id })
-  Request.find({ review: req.params.review_id })
+  // Request.find({ review: req.params.review_id })
+  Request.findOne({ 'review.user_id': req.user.id ,  'review._id': req.params.review_id })
+
     .then((request) => {
       if (request) {
         //Pass the result of Mongoose's `.get` method to the next `.then`
@@ -72,21 +80,23 @@ router.get('/api/reviews/:review_id', (req, res) => {
 * Description:   Create a new Review
 */
 
-router.post('/api/requests/:request_id/review', (req, res) => {
+router.post('/api/requests/:request_id/review', requireToken, (req, res) => {
 
 
   Request.findById(req.params.request_id)
     .then((request) => {
+      console.log(request)
       if (request) {
 
         const newReview = new Review({
-          user_id: current_user.id,
-          title: req.body.request.title,
-          content: req.body.request.content,
+          user_id: req.user.id,
+          title: req.body.review.title,
+          content: req.body.review.content,
         })
 
         request.review = newReview
-        request.save()
+        request.save();
+        res.status(200).send(request);
       } else {
         //if we couldn't find a document with matching ID
         res.status(404).json({
@@ -112,19 +122,19 @@ router.post('/api/requests/:request_id/review', (req, res) => {
 * Description:   Update an Request by Request id
 */
 
-router.patch('/api/requests/:request_id/', (req, res) => {
+router.patch('/api/reviews/:review_id/', requireToken, (req, res) => {
 
   // Request.find({user_id: _id , _id:req.params.request_id })
-  Request.findById(req.params.request_id)
-  .then((request) => {
-    if (request) {
-
-      request.review = req.body.review
-      request.save()
-
-        //Pass the result of Mongoose's `.update` method to the next `.then`
-
-        return request
+  console.log(req.params.review_id)
+  Request.findOneAndUpdate({  'review.user_id': req.user.id , 'review._id': req.params.review_id },
+  {'review.title': req.body.review.title , 'review.content': req.body.review.content }
+  , {new: true})
+    .then((request) => {
+      if (request) {
+        console.log(request.review)
+        
+      res.status(200).send(request);
+        
       } else {
         //if we couldn't find a document with matching ID
         res.status(404).json({
@@ -134,10 +144,6 @@ router.patch('/api/requests/:request_id/', (req, res) => {
           }
         })
       }
-    })
-    .then((request) => {
-      //if the update succeeded, return 204 and no JSON
-      res.status(200).send(request);
     })
     //catch any error that might accrue
     .catch((error) => {
@@ -154,13 +160,14 @@ router.patch('/api/requests/:request_id/', (req, res) => {
 * Description:   Delete an Request by Request id
 */
 
-router.delete('/api/requests/:request_id', (req, res) => {
+router.delete('/api/reviews/:review_id', requireToken, (req, res) => {
 
-  // Request.find({user_id: _id , _id:req.params.request_id })
-  Request.findById(req.params.request_id)
-    .then((request) => {
-      if (request) {
-        //Pass the result of Mongoose's `.delete` method to the next `.then`
+
+  Request.findOne({ 'review.user_id': req.user.id ,  'review._id': req.params.review_id })
+  .then((request) => {
+    if (request) {
+      //Pass the result of Mongoose's `.delete` method to the next `.then`
+      console.log('request',  request)
         request.review.remove();
         request.save();
         return request
