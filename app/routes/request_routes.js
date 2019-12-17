@@ -4,12 +4,17 @@ const express = require('express');
 //Require Mongoose Model for Request
 const Request = require('../models/request').Request
 
+const User = require('../models/user').User
+const Role = require('../models/user').Role
+
 const passport = require('passport')
 
 const requireToken = passport.authenticate('bearer', { session: false })
 
 //Instantiate a Router (mini app that only handles routes)
 const router = express.Router();
+
+
 
 
 /**
@@ -21,8 +26,30 @@ const router = express.Router();
 
 router.get('/api/requests', requireToken, (req, res) => {
 
-  console.log(req.user)
-  Request.find({ user_id: req.user._id })
+  let role
+
+  User.findById(req.user._id)
+  .then((user)=>{
+    Role.findById(user.role)
+    .then((role)=>{
+
+        role = role.title;
+    })
+    .catch(error=>{
+      res.status(500).json({ error: error })
+    })
+  })
+  .catch((error)=>{
+    res.status(500).json({ error: error })
+  })
+    let query;
+  if(role === 'manger'){
+    query = req.user._id
+  }else{
+      query = {}
+  }
+  
+  Request.find(query)
 
     //Return all Request as an array
     .then((requests) => {
@@ -44,7 +71,30 @@ router.get('/api/requests', requireToken, (req, res) => {
 
 router.get('/api/requests/:request_id', requireToken, (req, res) => {
 
-  Request.find({ user_id: req.user._id, _id: req.params.request_id })
+  let role
+
+  User.findById(req.user._id)
+  .then((user)=>{
+    Role.findById(user.role)
+    .then((role)=>{
+
+        role = role.title;
+    })
+    .catch(error=>{
+      res.status(500).json({ error: error })
+    })
+  })
+  .catch((error)=>{
+    res.status(500).json({ error: error })
+  })
+    let query;
+  if(role === 'manger'){
+    query = {user_id: req.user._id,  _id: req.params.request_id }
+  }else{
+      query = {_id: req.params.request_id}
+  }
+
+  Request.find(query)
     .then((request) => {
       if (request) {
         //Pass the result of Mongoose's `.get` method to the next `.then`
@@ -81,6 +131,7 @@ router.post('/api/requests', requireToken, (req, res) => {
     shift: req.body.request.shift,
     days: req.body.request.days,
     details: req.body.request.details,
+    status: "5df799cb5431528b47318a47",
   }
   console.log(newRequest)
   Request.create(newRequest)
@@ -111,6 +162,7 @@ router.patch('/api/requests/:request_id', requireToken, (req, res) => {
     shift: req.body.request.shift,
     days: req.body.request.days,
     details: req.body.request.details,
+    status: req.body.request.status
   }, { new: true })
     .then((request) => {
       if (request) {
@@ -173,6 +225,7 @@ router.delete('/api/requests/:request_id', requireToken, (req, res) => {
       res.status(500).json({ error: error });
     })
 })
+
 
 
 //Export the router so we can use it in the server.js file
