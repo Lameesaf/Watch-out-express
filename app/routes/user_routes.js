@@ -5,7 +5,8 @@ const crypto = require('crypto')
 const passport = require('passport')
 // bcrypt docs: https://github.com/kelektiv/node.bcrypt.js
 const bcrypt = require('bcrypt')
-
+// mongoose
+const mongoose = require("mongoose")
 // see above for explanation of "salting", 10 rounds is recommended
 const bcryptSaltRounds = 10
 
@@ -47,7 +48,7 @@ router.post('/sign-up', (req, res, next) => {
         name: req.body.credentials.name,
         email: req.body.credentials.email,
         hashedPassword: hash,
-        role: req.body.credentials.role
+        role: mongoose.Types.ObjectId(req.body.credentials.role)
 
       }
     })
@@ -67,8 +68,9 @@ router.post('/sign-in', (req, res, next) => {
   let user
 
   // find a user based on the email that was passed
-  User.findOne({ email: req.body.credentials.email })
+  User.findOne({ email: req.body.credentials.email }).populate("role")
     .then(record => {
+      console.log(record);
       // if we didn't find a user with that email, send 401
       if (!record) {
         throw new BadCredentialsError()
