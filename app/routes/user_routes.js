@@ -30,6 +30,25 @@ const router = express.Router()
 // SIGN UP
 // POST /sign-up
 router.post('/sign-up', (req, res, next) => {
+  
+  console.log('hash',req.body.credentials)
+      let roleId;
+        Role.findOne({title: req.body.credentials.role})
+        .then(role=>{
+          console.log('role',role)
+          if(role){
+          roleId = role._id
+        }
+          else{
+            roleId = '5dfa333fa478a213d9ca07d4'
+          }
+          console.log('role if',roleId)
+
+        })
+        .catch(error=>{
+        res.status(500).json({ error: error });
+
+        })
   // start a promise chain, so that any errors will pass to `handle`
   Promise.resolve(req.body.credentials)
     // reject any requests where `credentials.password` is not present, or where
@@ -44,20 +63,9 @@ router.post('/sign-up', (req, res, next) => {
     // generate a hash from the provided password, returning a promise
     .then(() => bcrypt.hash(req.body.credentials.password, bcryptSaltRounds))
     .then(hash => {
-      let roleId;
-        Role.findOne({title: 'req.body.credentials.role'})
-        .then(role=>{
-          if(role){
-          roleId = role._id}
-          else{
-            roleId = '5dfa333fa478a213d9ca07d4'
-          }
-        })
-        .catch(errors=>{
-        res.status(500).json({ error: error });
-
-        })
+      
       // return necessary params to create a user
+      console.log('role if',roleId)
       return {
         name: req.body.credentials.name,
         email: req.body.credentials.email,
@@ -153,6 +161,13 @@ router.delete('/sign-out', requireToken, (req, res, next) => {
   req.user.token = crypto.randomBytes(16)
   // save the token and respond with 204
   req.user.save()
+    .then(() => res.sendStatus(204))
+    .catch(next)
+})
+
+router.delete('/delete-user', requireToken, (req, res, next) => {
+  
+  User.findByIdAndDelete(req.user.id)
     .then(() => res.sendStatus(204))
     .catch(next)
 })
