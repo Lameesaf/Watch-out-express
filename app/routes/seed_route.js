@@ -19,19 +19,19 @@ const roles = [
     title: 'admin'
   }
 ]
-router.get('/api/seed', (req, res) => {
+// router.get('/api/seed', (req, res) => {
 
-   Role.insertMany(roles)
+//    Role.insertMany(roles)
 
-    .then((role) => {
-      console.log(role)
-        return res.status(200).json({role: role});
-    })
-    //catch any error that might accrue
-    .catch((error) => {
-      res.status(500).json({ error: error })
-    })
-})
+//     .then((role) => {
+//       console.log(role)
+//         return res.status(200).json({role: role});
+//     })
+//     //catch any error that might accrue
+//     .catch((error) => {
+//       res.status(500).json({ error: error })
+//     })
+// })
 
 router.get('/api/seeds', (req, res) => {
 
@@ -47,29 +47,29 @@ router.get('/api/seeds', (req, res) => {
    })
 })
 
-router.delete('/api/seed/:id', (req,res)=>{
-  console.log(req.params.id)
-  Role.findOneAndRemove({_id:req.params.id})
+// router.delete('/api/seed/:id', (req,res)=>{
+//   console.log(req.params.id)
+//   Role.findOneAndRemove({_id:req.params.id})
 
-  .then(role=>{
-    res.status(204).json({role: role})
-  })
-  .catch((error) => {
-    res.status(500).json({ error: error });
-  })
-})
+//   .then(role=>{
+//     res.status(204).json({role: role})
+//   })
+//   .catch((error) => {
+//     res.status(500).json({ error: error });
+//   })
+// })
 
-router.get('/api/seed/', (req,res)=>{
+// router.get('/api/seed/', (req,res)=>{
 
-  Role.create({title: 'admin'})
+//   Role.create({title: 'admin'})
 
-  .then(role=>{
-    res.status(204).json({role:role})
-  })
-  .catch((error) => {
-    res.status(500).json({ error: error });
-  })
-})
+//   .then(role=>{
+//     res.status(204).json({role:role})
+//   })
+//   .catch((error) => {
+//     res.status(500).json({ error: error });
+//   })
+// })
 
 
 module.exports = router;
