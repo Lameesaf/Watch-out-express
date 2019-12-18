@@ -47,7 +47,8 @@ router.get('/api/seeds', (req, res) => {
    })
 })
 
-router.delete('api/seed/:id', (req,res)=>{
+router.delete('/api/seed/:id', (req,res)=>{
+  console.log(req.params.id)
   Role.findOneAndRemove({_id:req.params.id})
 
   .then(role=>{
