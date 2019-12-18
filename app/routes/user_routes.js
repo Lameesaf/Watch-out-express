@@ -30,42 +30,42 @@ const router = express.Router()
 // SIGN UP
 // POST /sign-up
 router.post('/sign-up', (req, res, next) => {
-  
-  console.log('hash',req.body.credentials)
-      let roleId;
-        Role.findOne({title: req.body.credentials.role})
-        .then(role=>{
-          console.log('role',role)
-          if(role){
-          roleId = role._id
-        }
-          else{
-            roleId = '5dfa333fa478a213d9ca07d4'
-          }
-          console.log('role if',roleId)
 
-        })
-        .catch(error=>{
-        res.status(500).json({ error: error });
+  console.log('hash', req.body.credentials)
+  let roleId;
+  Role.findOne({ title: req.body.credentials.role })
+    .then(role => {
+      console.log('role', role)
+      if (role) {
+        roleId = role._id
+      }
+      else {
+        roleId = '5dfa333fa478a213d9ca07d4'
+      }
+      console.log('role if', roleId)
 
-        })
+    })
+    .catch(error => {
+      res.status(500).json({ error: error });
+
+    })
   // start a promise chain, so that any errors will pass to `handle`
   Promise.resolve(req.body.credentials)
     // reject any requests where `credentials.password` is not present, or where
     // the password is an empty string
     .then(credentials => {
       if (!credentials ||
-          !credentials.password ||
-          credentials.password !== credentials.password_confirmation) {
+        !credentials.password ||
+        credentials.password !== credentials.password_confirmation) {
         throw new BadParamsError()
       }
     })
     // generate a hash from the provided password, returning a promise
     .then(() => bcrypt.hash(req.body.credentials.password, bcryptSaltRounds))
     .then(hash => {
-      
+
       // return necessary params to create a user
-      console.log('role if',roleId)
+      console.log('role if', roleId)
       return {
         name: req.body.credentials.name,
         email: req.body.credentials.email,
@@ -156,6 +156,30 @@ router.patch('/change-password', requireToken, (req, res, next) => {
     .catch(next)
 })
 
+
+
+router.patch('/change-role', requireToken, (req, res, next) => {
+
+  let roleId;
+  Role.findOne({ title: 'admin' })
+    .then(role => {
+      if (role) {
+        roleId = role._id
+      }
+    })
+  // `req.user` will be determined by decoding the token payload
+  User.findOneAndUpdate({_id: req.user.id}, {$set: {role: mongoose.Types.ObjectId(roleId)}})
+    // respond with no content and status 200
+    .then((user) => {
+
+
+
+      res.status(204).json({user: user})
+    })
+    // pass any errors along to the error handler
+    .catch(next)
+})
+
 router.delete('/sign-out', requireToken, (req, res, next) => {
   // create a new random token for the user, invalidating the current one
   req.user.token = crypto.randomBytes(16)
@@ -166,7 +190,7 @@ router.delete('/sign-out', requireToken, (req, res, next) => {
 })
 
 router.delete('/delete-user', requireToken, (req, res, next) => {
-  
+
   User.findByIdAndDelete(req.user.id)
     .then(() => res.sendStatus(204))
     .catch(next)
