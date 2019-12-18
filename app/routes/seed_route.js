@@ -47,17 +47,17 @@ router.get('/api/seeds', (req, res) => {
    })
 })
 
-router.delete('/api/seed/:id', (req,res)=>{
-  console.log(req.params.id)
-  Role.findOneAndRemove({_id:req.params.id})
+// router.delete('/api/seed/:id', (req,res)=>{
+//   console.log(req.params.id)
+//   Role.findOneAndRemove({_id:req.params.id})
 
-  .then(role=>{
-    res.status(204).json({role: role})
-  })
-  .catch((error) => {
-    res.status(500).json({ error: error });
-  })
-})
+//   .then(role=>{
+//     res.status(204).json({role: role})
+//   })
+//   .catch((error) => {
+//     res.status(500).json({ error: error });
+//   })
+// })
 
 // router.get('/api/seed/', (req,res)=>{
 
