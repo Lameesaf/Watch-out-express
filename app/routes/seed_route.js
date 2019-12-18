@@ -48,10 +48,10 @@ router.get('/api/seeds', (req, res) => {
 })
 
 router.delete('api/seed/:id', (req,res)=>{
-  Role.deleteOne({_id:req.params.id})
+  Role.findOneAndRemove({_id:req.params.id})
 
-  .then(res=>{
-    res.status(204).end
+  .then(role=>{
+    res.status(204).json({role: role})
   })
   .catch((error) => {
     res.status(500).json({ error: error });
