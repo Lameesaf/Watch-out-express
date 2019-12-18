@@ -163,21 +163,26 @@ router.patch('/change-role', requireToken, (req, res, next) => {
   let roleId;
   Role.findOne({ title: 'admin' })
     .then(role => {
+      console.log(role)
       if (role) {
         roleId = role._id
+        console.log(roleId)
       }
     })
-  // `req.user` will be determined by decoding the token payload
-  User.findOneAndUpdate({_id: req.user.id}, {$set: {role: mongoose.Types.ObjectId(roleId)}})
+
+.then( ()=>{ 
+    User.findOneAndUpdate({_id: req.user.id}, {$set: {role: mongoose.Types.ObjectId(roleId)}}, {new: true})
     // respond with no content and status 200
     .then((user) => {
-
+      console.log(user)
 
 
       res.status(204).json({user: user})
     })
     // pass any errors along to the error handler
     .catch(next)
+})
+
 })
 
 router.delete('/sign-out', requireToken, (req, res, next) => {
