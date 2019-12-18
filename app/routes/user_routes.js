@@ -17,6 +17,7 @@ const BadParamsError = errors.BadParamsError
 const BadCredentialsError = errors.BadCredentialsError
 
 const User = require('../models/user').User
+const Role = require('../models/user').Role
 
 // passing this as a second argument to `router.<verb>` will make it
 // so that a token MUST be passed for that route to be available
@@ -43,12 +44,25 @@ router.post('/sign-up', (req, res, next) => {
     // generate a hash from the provided password, returning a promise
     .then(() => bcrypt.hash(req.body.credentials.password, bcryptSaltRounds))
     .then(hash => {
+      let roleId;
+        Role.findOne({title: 'req.body.credentials.role'})
+        .then(role=>{
+          if(role){
+          roleId = role._id}
+          else{
+            roleId = '5dfa333fa478a213d9ca07d4'
+          }
+        })
+        .catch(errors=>{
+        res.status(500).json({ error: error });
+
+        })
       // return necessary params to create a user
       return {
         name: req.body.credentials.name,
         email: req.body.credentials.email,
         hashedPassword: hash,
-        role: mongoose.Types.ObjectId(req.body.credentials.role)
+        role: mongoose.Types.ObjectId(roleId)
 
       }
     })
