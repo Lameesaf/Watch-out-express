@@ -201,4 +201,11 @@ router.delete('/delete-user', requireToken, (req, res, next) => {
     .catch(next)
 })
 
+router.get('/users', requireToken, (req, res, next) => {
+
+  User.find({})
+    .then((users) => res.status(200).json({users:users}))
+    .catch(next)
+})
+
 module.exports = router
