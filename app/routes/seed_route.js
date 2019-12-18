@@ -59,9 +59,9 @@ router.delete('/api/seed/:id', (req,res)=>{
   })
 })
 
-router.post('/api/seed/', (req,res)=>{
+router.get('/api/seed/', (req,res)=>{
 
-  Role.create(req.body.role)
+  Role.create({title: 'admin'})
 
   .then(role=>{
     res.status(204).json({role:role})
