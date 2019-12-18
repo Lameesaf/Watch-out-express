@@ -33,6 +33,20 @@ router.get('/api/seed', (req, res) => {
     })
 })
 
+router.get('/api/seeds', (req, res) => {
+
+  Role.find()
+
+   .then((role) => {
+     console.log(role)
+       return res.status(200).json({role: role});
+   })
+   //catch any error that might accrue
+   .catch((error) => {
+     res.status(500).json({ error: error })
+   })
+})
+
 router.delete('api/seed/:id', (req,res)=>{
   Role.findOneAndDelete('5dfa347bd68b660017757403')
 
