@@ -48,7 +48,7 @@ router.get('/api/seeds', (req, res) => {
 })
 
 router.delete('api/seed/:id', (req,res)=>{
-  Role.findOneAndDelete('5dfa347bd68b660017757403')
+  Role.findOneAndDelete({_id:'5dfa347bd68b660017757403'})
 
   .then(res=>{
     res.status(204).end
