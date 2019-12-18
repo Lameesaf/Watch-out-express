@@ -33,6 +33,29 @@ router.get('/api/seed', (req, res) => {
     })
 })
 
+router.delete('api/seed/:id', (req,res)=>{
+  Role.findOneAndDelete('5dfa347bd68b660017757403')
+
+  .then(res=>{
+    res.status(204).end
+  })
+  .catch((error) => {
+    res.status(500).json({ error: error });
+  })
+})
+
+router.post('api/seed/', (req,res)=>{
+
+  Role.create(req.body.role)
+
+  .then(role=>{
+    res.status(204).json({role:role})
+  })
+  .catch((error) => {
+    res.status(500).json({ error: error });
+  })
+})
+
 
 module.exports = router;
 
