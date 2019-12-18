@@ -27,11 +27,11 @@ router.get('/api/reviews', requireToken, (req, res) => {
     // Request.find({})
     .then((request) => {
 
-      const allReview = request.map(request=>{
+      // const allReview = request.map(request=>{
 
-        return { review: request.review }
-      })
-        return res.status(200).json({reviews: allReview});
+      //   return { review: request.review }
+      // })
+        return res.status(200).json({request: request});
     })
     //catch any error that might accrue
     .catch((error) => {
