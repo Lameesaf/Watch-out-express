@@ -26,12 +26,27 @@ router.get('/api/reviews', requireToken, (req, res) => {
   Request.find({ 'review.user_id': req.user.id })
     // Request.find({})
     .then((request) => {
+      console.log(request)
+
+      console.log(request.length)
+
+      if (request.length <= 0) {
+        console.log('hi')
+        Request.find({user_id: req.user.id})
+          .then(request => {
+            console.log(request, 'id', req.user.id)
+            return res.status(200).json({ request: request });
+          })
+      } else {
+        return res.status(200).json({ request: request });
+
+      }
+
 
       // const allReview = request.map(request=>{
 
       //   return { review: request.review }
       // })
-        return res.status(200).json({request: request});
     })
     //catch any error that might accrue
     .catch((error) => {
@@ -51,7 +66,7 @@ router.get('/api/reviews/:review_id', requireToken, (req, res) => {
 
   // Request.find({user_id: _id , review:req.params.review_id })
   // Request.find({ review: req.params.review_id })
-  Request.findOne({ 'review.user_id': req.user.id ,  'review._id': req.params.review_id })
+  Request.findOne({ 'review.user_id': req.user.id, 'review._id': req.params.review_id })
 
     .then((request) => {
       if (request) {
@@ -126,15 +141,15 @@ router.patch('/api/reviews/:review_id/', requireToken, (req, res) => {
 
   // Request.find({user_id: _id , _id:req.params.request_id })
   console.log(req.params.review_id)
-  Request.findOneAndUpdate({  'review.user_id': req.user.id , 'review._id': req.params.review_id },
-  {'review.title': req.body.review.title , 'review.content': req.body.review.content }
-  , {new: true})
+  Request.findOneAndUpdate({ 'review.user_id': req.user.id, 'review._id': req.params.review_id },
+    { 'review.title': req.body.review.title, 'review.content': req.body.review.content }
+    , { new: true })
     .then((request) => {
       if (request) {
         console.log(request.review)
-        
-      res.status(200).send(request);
-        
+
+        res.status(200).send(request);
+
       } else {
         //if we couldn't find a document with matching ID
         res.status(404).json({
@@ -163,11 +178,11 @@ router.patch('/api/reviews/:review_id/', requireToken, (req, res) => {
 router.delete('/api/reviews/:review_id', requireToken, (req, res) => {
 
 
-  Request.findOne({ 'review.user_id': req.user.id ,  'review._id': req.params.review_id })
-  .then((request) => {
-    if (request) {
-      //Pass the result of Mongoose's `.delete` method to the next `.then`
-      console.log('request',  request)
+  Request.findOne({ 'review.user_id': req.user.id, 'review._id': req.params.review_id })
+    .then((request) => {
+      if (request) {
+        //Pass the result of Mongoose's `.delete` method to the next `.then`
+        console.log('request', request)
         request.review.remove();
         request.save();
         return request
